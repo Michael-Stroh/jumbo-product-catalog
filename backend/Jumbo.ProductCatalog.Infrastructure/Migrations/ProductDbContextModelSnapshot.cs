@@ -17,6 +17,7 @@ namespace Jumbo.ProductCatalog.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("catalog")
                 .HasAnnotation("ProductVersion", "10.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
@@ -69,7 +70,7 @@ namespace Jumbo.ProductCatalog.Infrastructure.Migrations
                     b.HasIndex("Code")
                         .IsUnique();
 
-                    b.ToTable("products");
+                    b.ToTable("products", "catalog");
                 });
 #pragma warning restore 612, 618
         }

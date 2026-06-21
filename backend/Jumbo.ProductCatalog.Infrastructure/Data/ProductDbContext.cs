@@ -9,6 +9,8 @@ public sealed class ProductDbContext(DbContextOptions<ProductDbContext> options)
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasDefaultSchema("catalog");
+
         modelBuilder.Entity<Product>(entity =>
         {
             // Exclude archived rows from all queries automatically.

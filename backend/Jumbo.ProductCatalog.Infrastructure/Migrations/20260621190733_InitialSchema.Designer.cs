@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Jumbo.ProductCatalog.Infrastructure.Migrations
 {
     [DbContext(typeof(ProductDbContext))]
-    [Migration("20260621183618_InitialSchema")]
+    [Migration("20260621190733_InitialSchema")]
     partial class InitialSchema
     {
         /// <inheritdoc />
@@ -20,6 +20,7 @@ namespace Jumbo.ProductCatalog.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("catalog")
                 .HasAnnotation("ProductVersion", "10.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
@@ -72,7 +73,7 @@ namespace Jumbo.ProductCatalog.Infrastructure.Migrations
                     b.HasIndex("Code")
                         .IsUnique();
 
-                    b.ToTable("products");
+                    b.ToTable("products", "catalog");
                 });
 #pragma warning restore 612, 618
         }

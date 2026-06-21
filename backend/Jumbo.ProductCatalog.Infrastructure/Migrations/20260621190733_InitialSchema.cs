@@ -11,8 +11,12 @@ namespace Jumbo.ProductCatalog.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.EnsureSchema(
+                name: "catalog");
+
             migrationBuilder.CreateTable(
                 name: "products",
+                schema: "catalog",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -32,6 +36,7 @@ namespace Jumbo.ProductCatalog.Infrastructure.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_products_code",
+                schema: "catalog",
                 table: "products",
                 column: "code",
                 unique: true);
@@ -41,7 +46,8 @@ namespace Jumbo.ProductCatalog.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "products");
+                name: "products",
+                schema: "catalog");
         }
     }
 }
