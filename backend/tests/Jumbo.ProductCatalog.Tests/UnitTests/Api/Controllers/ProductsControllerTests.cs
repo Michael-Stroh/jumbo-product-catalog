@@ -6,6 +6,7 @@ using Jumbo.ProductCatalog.Domain.Common;
 using Jumbo.ProductCatalog.Domain.Enums;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using NSubstitute;
 
 namespace Jumbo.ProductCatalog.Tests.UnitTests.Api.Controllers;
@@ -14,11 +15,12 @@ namespace Jumbo.ProductCatalog.Tests.UnitTests.Api.Controllers;
 public sealed class ProductsControllerTests
 {
     private readonly IProductCatalogService _service = Substitute.For<IProductCatalogService>();
+    private readonly IOutputCacheStore _cacheStore = Substitute.For<IOutputCacheStore>();
     private readonly ProductsController _sut;
 
     public ProductsControllerTests()
     {
-        _sut = new ProductsController(_service)
+        _sut = new ProductsController(_service, _cacheStore)
         {
             ControllerContext = new ControllerContext
             {
