@@ -7,10 +7,12 @@ namespace Jumbo.ProductCatalog.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public sealed class ProductsController(IProductCatalogService productService) : ControllerBase
+public sealed class ProductsController(IProductCatalogService productService, IOutputCacheStore cacheStore) : ControllerBase
 {
+    private const string ProductListTag = "products-list";
+
     [HttpGet]
-    [OutputCache(Duration = 300)]
+    [OutputCache(Duration = 300, Tags = [ProductListTag])]
     [ProducesResponseType<IReadOnlyList<ProductDto>>(StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAllAsync(CancellationToken ct) =>
         Ok(await productService.GetAllAsync(ct));
@@ -35,6 +37,7 @@ public sealed class ProductsController(IProductCatalogService productService) : 
             return Problem(title: "Validation error", detail: result.Error, statusCode: StatusCodes.Status400BadRequest);
         }
 
+        await cacheStore.EvictByTagAsync(ProductListTag, ct);
         return Created($"{Request.Path}/{result.Value.Id}", result.Value);
     }
 
@@ -49,6 +52,7 @@ public sealed class ProductsController(IProductCatalogService productService) : 
             return Problem(title: "Not found", detail: result.Error, statusCode: StatusCodes.Status404NotFound);
         }
 
+        await cacheStore.EvictByTagAsync(ProductListTag, ct);
         return Ok(result.Value);
     }
 
@@ -63,11 +67,16 @@ public sealed class ProductsController(IProductCatalogService productService) : 
             return Problem(title: "Not found", detail: result.Error, statusCode: StatusCodes.Status404NotFound);
         }
 
+        await cacheStore.EvictByTagAsync(ProductListTag, ct);
         return NoContent();
     }
 
     [HttpPost("import")]
     [ProducesResponseType<ImportResult>(StatusCodes.Status200OK)]
-    public async Task<IActionResult> ImportAsync([FromBody] List<CreateProductRequest> items, CancellationToken ct) =>
-        Ok(await productService.ImportAsync(items, ct));
+    public async Task<IActionResult> ImportAsync([FromBody] List<CreateProductRequest> items, CancellationToken ct)
+    {
+        var result = await productService.ImportAsync(items, ct);
+        await cacheStore.EvictByTagAsync(ProductListTag, ct);
+        return Ok(result);
+    }
 }
