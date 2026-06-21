@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.RegularExpressions;
 using FluentAssertions;
 using Jumbo.ProductCatalog.Core.Interfaces;
 using Jumbo.ProductCatalog.Core.Services;
@@ -51,5 +53,48 @@ public sealed class ExportServiceTests
             result.FileName,
             Arg.Is<byte[]>(b => b.Length > 0),
             Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ExportActiveProductsAsync_FileNameMatchesTimestampPattern()
+    {
+        _repository.GetActiveAsync(Arg.Any<CancellationToken>()).Returns([]);
+        string capturedFileName = string.Empty;
+        _storageWriter
+            .When(s => s.WriteAsync(Arg.Any<string>(), Arg.Any<byte[]>(), Arg.Any<CancellationToken>()))
+            .Do(call => capturedFileName = call.ArgAt<string>(0));
+
+        await _sut.ExportActiveProductsAsync();
+
+        Regex.IsMatch(capturedFileName, @"^active-products-\d{14}\.json$").Should().BeTrue(
+            "filename should match active-products-yyyyMMddHHmmss.json");
+    }
+
+    [Fact]
+    public async Task ExportActiveProductsAsync_SerializesAllProductFields()
+    {
+        var product = new Product
+        {
+            Code = "TEST1",
+            Name = "Test Product",
+            Category = Category.Food,
+            Content = "some content",
+            IsActive = true,
+        };
+        _repository.GetActiveAsync(Arg.Any<CancellationToken>()).Returns((IReadOnlyList<Product>)[product]);
+        byte[] capturedBytes = [];
+        _storageWriter
+            .When(s => s.WriteAsync(Arg.Any<string>(), Arg.Any<byte[]>(), Arg.Any<CancellationToken>()))
+            .Do(call => capturedBytes = call.ArgAt<byte[]>(1));
+
+        await _sut.ExportActiveProductsAsync();
+
+        var json = JsonSerializer.Deserialize<JsonElement[]>(capturedBytes)!;
+        var first = json.Single();
+        first.GetProperty("Code").GetString().Should().Be("TEST1");
+        first.GetProperty("Name").GetString().Should().Be("Test Product");
+        first.GetProperty("Category").GetString().Should().Be("Food");
+        first.GetProperty("Content").GetString().Should().Be("some content");
+        first.GetProperty("IsActive").GetBoolean().Should().BeTrue();
     }
 }

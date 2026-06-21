@@ -218,4 +218,50 @@ public sealed class ProductCatalogServiceTests
             Arg.Is<IEnumerable<Product>>(p => p.Count() == 1),
             Arg.Any<CancellationToken>());
     }
+
+    [Fact]
+    public async Task GetAllAsync_ReturnsMappedDtos()
+    {
+        var products = (IReadOnlyList<Product>)
+        [
+            new Product { Code = "A1", Name = "Alpha", Category = Category.Food },
+            new Product { Code = "B2", Name = "Beta", Category = Category.NonFood },
+        ];
+        _repository.GetAllAsync(Arg.Any<CancellationToken>()).Returns(products);
+
+        var result = await _sut.GetAllAsync();
+
+        result.Should().HaveCount(2);
+        result.Select(p => p.Code).Should().BeEquivalentTo(["A1", "B2"]);
+    }
+
+    [Fact]
+    public async Task GetActiveAsync_ReturnsMappedDtos()
+    {
+        var products = (IReadOnlyList<Product>)
+        [
+            new Product { Code = "A1", Name = "Alpha", Category = Category.Food, IsActive = true },
+        ];
+        _repository.GetActiveAsync(Arg.Any<CancellationToken>()).Returns(products);
+
+        var result = await _sut.GetActiveAsync();
+
+        result.Should().ContainSingle().Which.Code.Should().Be("A1");
+    }
+
+    [Fact]
+    public async Task ImportAsync_EmptyList_ReturnsZeroAndSkipsRepositoryWrite()
+    {
+        _repository.GetByCodesIncludingArchivedAsync(Arg.Any<IEnumerable<string>>(), Arg.Any<CancellationToken>())
+            .Returns(new List<Product>());
+
+        var result = await _sut.ImportAsync([]);
+
+        result.Processed.Should().Be(0);
+        result.SkippedCodes.Should().BeEmpty();
+        await _repository.DidNotReceive().ImportBatchAsync(
+            Arg.Any<IEnumerable<Product>>(),
+            Arg.Any<IEnumerable<Product>>(),
+            Arg.Any<CancellationToken>());
+    }
 }

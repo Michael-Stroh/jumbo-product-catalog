@@ -91,6 +91,7 @@ app.UseStatusCodePages();
 // Security
 app.UseHttpsRedirection();
 app.UseCors();
+app.UseOutputCache();
 app.UseAuthorization();
 
 /*

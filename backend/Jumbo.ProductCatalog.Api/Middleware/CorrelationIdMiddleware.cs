@@ -2,7 +2,7 @@ using System.Diagnostics;
 
 namespace Jumbo.ProductCatalog.Api.Middleware;
 
-internal sealed class CorrelationIdMiddleware(RequestDelegate next)
+public sealed class CorrelationIdMiddleware(RequestDelegate next)
 {
     private const string HeaderName = "X-Correlation-ID";
 

@@ -158,4 +158,16 @@ public sealed class ProductsControllerTests
         var ok = response.Should().BeOfType<OkObjectResult>().Subject;
         ok.Value.Should().Be(expected);
     }
+
+    [Fact]
+    public async Task GetAllAsync_EmptyStore_Returns200WithEmptyList()
+    {
+        _service.GetAllAsync(Arg.Any<CancellationToken>()).Returns((IReadOnlyList<ProductDto>)[]);
+
+        var response = await _sut.GetAllAsync(CancellationToken.None);
+
+        var ok = response.Should().BeOfType<OkObjectResult>().Subject;
+        ok.Value.Should().BeAssignableTo<IReadOnlyList<ProductDto>>()
+            .Which.Should().BeEmpty();
+    }
 }
