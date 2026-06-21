@@ -1,0 +1,72 @@
+[
+  {
+    "Code": "F1001",
+    "Name": "Organic Bananas",
+    "Category": "Food",
+    "Content": "Fresh organic bananas sourced from sustainable farms. Ideal for smoothies and snacking.",
+    "IsActive": true
+  },
+  {
+    "Code": "F1002",
+    "Name": "Whole Milk 1L",
+    "Category": "Food",
+    "Content": "Fresh whole milk packed in 1-liter bottles. Keep refrigerated.",
+    "IsActive": false
+  },
+  {
+    "Code": "F1003",
+    "Name": "Cheddar Cheese 200g",
+    "Category": "Food",
+    "Content": "Mild cheddar cheese perfect for sandwiches, grated dishes, and snacking.",
+    "IsActive": true
+  },
+  {
+    "Code": "F1004",
+    "Name": "Free-Range Eggs 12-pack",
+    "Category": "Food",
+    "Content": "Pack of 12 free-range eggs from local farms. Keep refrigerated.",
+    "IsActive": false
+  },
+  {
+    "Code": "F1005",
+    "Name": "Fresh Salmon Fillet",
+    "Category": "Food",
+    "Content": "High-quality fresh salmon fillet, perfect for grilling or baking.",
+    "IsActive": true
+  },
+  {
+    "Code": "NF2001",
+    "Name": "Stainless Steel Kitchen Knife",
+    "Category": "NonFood",
+    "Content": "Durable kitchen knife for precise cutting, suitable for all types of food preparation.",
+    "IsActive": false
+  },
+  {
+    "Code": "NF2002",
+    "Name": "Ceramic Dinner Plate Set (6 pcs)",
+    "Category": "NonFood",
+    "Content": "Elegant set of 6 ceramic dinner plates, microwave and dishwasher safe.",
+    "IsActive": true
+  },
+  {
+    "Code": "NF2003",
+    "Name": "LED Desk Lamp",
+    "Category": "NonFood",
+    "Content": "Adjustable LED desk lamp with brightness control, energy-efficient lighting solution.",
+    "IsActive": false
+  },
+  {
+    "Code": "NF2004",
+    "Name": "Cotton Bath Towels (Set of 3)",
+    "Category": "NonFood",
+    "Content": "Soft and absorbent cotton towels, perfect for everyday use.",
+    "IsActive": true
+  },
+  {
+    "Code": "NF2005",
+    "Name": "Plastic Storage Containers (Pack of 5)",
+    "Category": "NonFood",
+    "Content": "Durable plastic containers for food storage and organization in your kitchen.",
+    "IsActive": false
+  }
+]

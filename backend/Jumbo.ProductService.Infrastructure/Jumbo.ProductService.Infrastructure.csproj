@@ -1,0 +1,8 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Jumbo.ProductService.Application\Jumbo.ProductService.Application.csproj" />
+    <ProjectReference Include="..\Jumbo.ProductService.Domain\Jumbo.ProductService.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

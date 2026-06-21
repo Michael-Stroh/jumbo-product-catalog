@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <UserSecretsId>dotnet-Jumbo.ProductService.Api-8f3a7e9c-2b1d-4f6a-9e8c-d7b5a3f1e2c4</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Scalar.AspNetCore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Jumbo.ProductService.Application\Jumbo.ProductService.Application.csproj" />
+    <ProjectReference Include="..\Jumbo.ProductService.Infrastructure\Jumbo.ProductService.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

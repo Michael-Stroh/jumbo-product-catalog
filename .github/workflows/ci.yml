@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore Jumbo.ProductService.sln --configfile NuGet.Config --source https://api.nuget.org/v3/index.json
+
+      - name: Build
+        run: dotnet build Jumbo.ProductService.sln --no-restore
+
+      - name: Verify formatting
+        run: dotnet format Jumbo.ProductService.sln --verify-no-changes
+
+      - name: Test
+        run: dotnet test Jumbo.ProductService.sln --no-build --settings coverage.runsettings --collect:"XPlat Code Coverage"
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: '**/TestResults/**/*.xml'
+          if-no-files-found: ignore
