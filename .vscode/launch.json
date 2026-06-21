@@ -1,0 +1,18 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch API",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "dotnet: build",
+      "program": "${workspaceFolder}/backend/Jumbo.ProductCatalog.Api/bin/Debug/net10.0/Jumbo.ProductCatalog.Api.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/backend/Jumbo.ProductCatalog.Api",
+      "stopAtEntry": false,
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  ]
+}
