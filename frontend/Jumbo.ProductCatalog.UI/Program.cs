@@ -1,5 +1,5 @@
-using Jumbo.ProductCatalog.UI.Configs;
 using Jumbo.ProductCatalog.UI.Components;
+using Jumbo.ProductCatalog.UI.Configs;
 
 var builder = WebApplication.CreateBuilder(args);
 

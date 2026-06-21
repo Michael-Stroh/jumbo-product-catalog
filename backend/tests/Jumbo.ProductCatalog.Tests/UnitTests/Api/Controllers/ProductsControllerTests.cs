@@ -4,6 +4,7 @@ using Jumbo.ProductCatalog.Core.DTOs;
 using Jumbo.ProductCatalog.Core.Interfaces;
 using Jumbo.ProductCatalog.Domain.Common;
 using Jumbo.ProductCatalog.Domain.Enums;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NSubstitute;
 
@@ -15,7 +16,16 @@ public sealed class ProductsControllerTests
     private readonly IProductCatalogService _service = Substitute.For<IProductCatalogService>();
     private readonly ProductsController _sut;
 
-    public ProductsControllerTests() => _sut = new ProductsController(_service);
+    public ProductsControllerTests()
+    {
+        _sut = new ProductsController(_service)
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { Request = { Path = "/api/products" } },
+            },
+        };
+    }
 
     private static ProductDto MakeProduct(Guid? id = null) => new(
         id ?? Guid.NewGuid(), "SKU1", "Product 1", Category.Food, null, true,
@@ -64,9 +74,9 @@ public sealed class ProductsControllerTests
 
         var response = await _sut.CreateAsync(request, CancellationToken.None);
 
-        var created = response.Should().BeOfType<CreatedAtActionResult>().Subject;
+        var created = response.Should().BeOfType<CreatedResult>().Subject;
         created.Value.Should().Be(product);
-        created.RouteValues!["id"].Should().Be(product.Id);
+        created.Location.Should().Be($"/api/products/{product.Id}");
     }
 
     [Fact]

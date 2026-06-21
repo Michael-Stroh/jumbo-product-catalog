@@ -41,6 +41,10 @@ csharp_style_expression_bodied_properties = true:suggestion
 # Braces
 csharp_prefer_braces = true:warning
 
+# EF-generated migrations may be UTF-8 BOM; exclude from charset enforcement
+[**/Migrations/*.cs]
+charset = unset
+
 [*.{json,yaml,yml}]
 indent_size = 2
 
