@@ -92,6 +92,61 @@ public sealed partial class ProductCatalogService(IProductRepository repository,
         return Result.Success();
     }
 
+    public async Task<ImportResult> ImportAsync(IReadOnlyList<CreateProductRequest> items, CancellationToken ct = default)
+    {
+        /*
+            one IN query instead of N individual lookups.
+            Ceiling: SQL Server's ~2000-parameter limit; upgrade path: chunk lookup in batches of 1000.
+            ImportBatchAsync uses a single SaveChangesAsync, which EF Core wraps in one implicit transaction.
+            duplicate codes within the input batch are not deduplicated here;
+            two items sharing a new code both land in toAdd and the DB unique constraint rejects the save.
+            Upgrade path: add items = items.DistinctBy(i => i.Code).ToList() before the fetch.
+        */
+        var existing = await repository.GetByCodesIncludingArchivedAsync(items.Select(i => i.Code), ct);
+        var existingByCode = existing.ToDictionary(p => p.Code);
+
+        var toAdd = new List<Product>();
+        var toReactivate = new List<Product>();
+        var skipped = new List<string>();
+
+        foreach (var item in items)
+        {
+            if (!existingByCode.TryGetValue(item.Code, out var found))
+            {
+                toAdd.Add(new Product
+                {
+                    Code = item.Code,
+                    Name = item.Name,
+                    Category = item.Category,
+                    Content = item.Content,
+                    IsActive = item.IsActive,
+                });
+            }
+            else if (found.IsArchived)
+            {
+                found.IsArchived = false;
+                found.Name = item.Name;
+                found.Category = item.Category;
+                found.Content = item.Content;
+                found.IsActive = item.IsActive;
+                toReactivate.Add(found);
+            }
+            else
+            {
+                skipped.Add(item.Code);
+            }
+        }
+
+        if (toAdd.Count > 0 || toReactivate.Count > 0)
+        {
+            await repository.ImportBatchAsync(toAdd, toReactivate, ct);
+        }
+
+        var processed = toAdd.Count + toReactivate.Count;
+        LogImportCompleted(processed, skipped.Count);
+        return new ImportResult(processed, skipped);
+    }
+
     private static ProductDto ToDto(Product p) =>
         new(p.Id, p.Code, p.Name, p.Category, p.Content, p.IsActive, p.CreatedAt, p.UpdatedAt);
 
@@ -103,4 +158,7 @@ public sealed partial class ProductCatalogService(IProductRepository repository,
 
     [LoggerMessage(LogLevel.Information, "Product reactivated: {Code}")]
     private partial void LogProductReactivated(string code);
+
+    [LoggerMessage(LogLevel.Information, "Import completed: {Processed} processed, {Skipped} skipped")]
+    private partial void LogImportCompleted(int processed, int skipped);
 }

@@ -17,6 +17,13 @@ public sealed class ProductRepository(ProductDbContext context) : IProductReposi
     public Task<Product?> GetByCodeIncludingArchivedAsync(string code, CancellationToken ct = default) =>
         context.Products.IgnoreQueryFilters().FirstOrDefaultAsync(p => p.Code == code, ct);
 
+    // Bulk variant — fetches a set of codes in one WHERE IN query for import.
+    public async Task<IReadOnlyList<Product>> GetByCodesIncludingArchivedAsync(IEnumerable<string> codes, CancellationToken ct = default)
+    {
+        var codeSet = codes.ToHashSet();
+        return await context.Products.IgnoreQueryFilters().Where(p => codeSet.Contains(p.Code)).ToListAsync(ct);
+    }
+
     public async Task<IReadOnlyList<Product>> GetAllAsync(CancellationToken ct = default) =>
         await context.Products.ToListAsync(ct);
 
@@ -33,6 +40,20 @@ public sealed class ProductRepository(ProductDbContext context) : IProductReposi
     {
         context.Update(product);
         return context.SaveChangesAsync(ct);
+    }
+
+    public Task UpdateRangeAsync(IEnumerable<Product> products, CancellationToken ct = default)
+    {
+        context.UpdateRange(products);
+        return context.SaveChangesAsync(ct);
+    }
+
+    // Single SaveChangesAsync wraps both inserts and updates in one implicit transaction.
+    public async Task ImportBatchAsync(IEnumerable<Product> toAdd, IEnumerable<Product> toUpdate, CancellationToken ct = default)
+    {
+        await context.Products.AddRangeAsync(toAdd, ct);
+        context.Products.UpdateRange(toUpdate);
+        await context.SaveChangesAsync(ct);
     }
 
     // soft delete — sets IsArchived=true; global query filter keeps archived rows invisible.

@@ -106,13 +106,25 @@ docker compose down -v       # stop and delete all data volumes
 
 Complete the [Docker setup](#docker-setup) steps above first.
 
-### 2. Run
+### 2. Run the API
 
 ```bash
 dotnet restore
 dotnet build
 dotnet run --project backend/Jumbo.ProductCatalog.Api
 ```
+
+The API listens on `https://localhost:7170` by default (see `backend/Jumbo.ProductCatalog.Api/Properties/launchSettings.json`).
+
+### 3. Run the frontend
+
+The Blazor UI points at the API via the `Api:BaseUrl` setting, which is already set to `https://localhost:7170` in `appsettings.Development.json`.
+
+```bash
+dotnet run --project frontend/Jumbo.ProductCatalog.UI
+```
+
+Opens at `http://localhost:5015` (or the HTTPS equivalent — see `frontend/Jumbo.ProductCatalog.UI/Properties/launchSettings.json`).
 
 ## Notes
 

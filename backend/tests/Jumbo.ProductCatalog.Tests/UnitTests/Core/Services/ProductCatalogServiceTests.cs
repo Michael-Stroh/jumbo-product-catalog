@@ -134,4 +134,88 @@ public sealed class ProductCatalogServiceTests
         result!.Id.Should().Be(productId);
         result.Code.Should().Be("P5");
     }
+
+    [Fact]
+    public async Task ImportAsync_AllNew_ProcessesAll()
+    {
+        _repository.GetByCodesIncludingArchivedAsync(Arg.Any<IEnumerable<string>>(), Arg.Any<CancellationToken>())
+            .Returns(new List<Product>());
+
+        var items = new List<CreateProductRequest>
+        {
+            new("I1", "Item 1", Category.Food, null),
+            new("I2", "Item 2", Category.NonFood, null),
+            new("I3", "Item 3", Category.Food, null),
+        };
+
+        var result = await _sut.ImportAsync(items);
+
+        result.Processed.Should().Be(3);
+        result.SkippedCodes.Should().BeEmpty();
+        await _repository.Received(1).ImportBatchAsync(
+            Arg.Is<IEnumerable<Product>>(p => p.Count() == 3),
+            Arg.Is<IEnumerable<Product>>(p => !p.Any()),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ImportAsync_WithDuplicateActiveCode_SkipsIt()
+    {
+        var active = new Product { Code = "DUP1", Name = "Existing", Category = Category.Food, IsActive = true };
+        _repository.GetByCodesIncludingArchivedAsync(Arg.Any<IEnumerable<string>>(), Arg.Any<CancellationToken>())
+            .Returns(new List<Product> { active });
+
+        var result = await _sut.ImportAsync([new("DUP1", "Name", Category.Food, null)]);
+
+        result.Processed.Should().Be(0);
+        result.SkippedCodes.Should().ContainSingle().Which.Should().Be("DUP1");
+        await _repository.DidNotReceive().ImportBatchAsync(
+            Arg.Any<IEnumerable<Product>>(),
+            Arg.Any<IEnumerable<Product>>(),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ImportAsync_MixedBatch_CorrectCounts()
+    {
+        var active = new Product { Code = "DUP1", Name = "Existing", Category = Category.Food, IsActive = true };
+        _repository.GetByCodesIncludingArchivedAsync(Arg.Any<IEnumerable<string>>(), Arg.Any<CancellationToken>())
+            .Returns(new List<Product> { active });
+
+        var items = new List<CreateProductRequest>
+        {
+            new("NEW1", "Item 1", Category.Food, null),
+            new("DUP1", "Item 2", Category.Food, null),
+            new("NEW2", "Item 3", Category.NonFood, null),
+        };
+
+        var result = await _sut.ImportAsync(items);
+
+        result.Processed.Should().Be(2);
+        result.SkippedCodes.Should().ContainSingle().Which.Should().Be("DUP1");
+        await _repository.Received(1).ImportBatchAsync(
+            Arg.Is<IEnumerable<Product>>(p => p.Count() == 2),
+            Arg.Is<IEnumerable<Product>>(p => !p.Any()),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ImportAsync_WithArchivedCode_ReactivatesIt()
+    {
+        var archived = new Product { Code = "ARC1", Name = "Old", Category = Category.Food, IsArchived = true };
+        _repository.GetByCodesIncludingArchivedAsync(Arg.Any<IEnumerable<string>>(), Arg.Any<CancellationToken>())
+            .Returns(new List<Product> { archived });
+
+        var result = await _sut.ImportAsync([new("ARC1", "New Name", Category.NonFood, null)]);
+
+        result.Processed.Should().Be(1);
+        result.SkippedCodes.Should().BeEmpty();
+        archived.IsArchived.Should().BeFalse();
+        archived.Name.Should().Be("New Name");
+        archived.Category.Should().Be(Category.NonFood);
+        await _repository.Received(1).ImportBatchAsync(
+            Arg.Is<IEnumerable<Product>>(p => !p.Any()),
+            Arg.Is<IEnumerable<Product>>(p => p.Count() == 1),
+            Arg.Any<CancellationToken>());
+    }
 }

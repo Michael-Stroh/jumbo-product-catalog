@@ -54,4 +54,8 @@ public sealed class ProductsController(IProductCatalogService productService) : 
 
         return NoContent();
     }
+
+    [HttpPost("import")]
+    public async Task<IActionResult> ImportAsync([FromBody] List<CreateProductRequest> items, CancellationToken ct) =>
+        Ok(await productService.ImportAsync(items, ct));
 }
