@@ -1,0 +1,69 @@
+@page "/products/import"
+@rendermode InteractiveServer
+@inject IHttpClientFactory HttpClientFactory
+
+<PageTitle>Import Products</PageTitle>
+<h1>Import Products</h1>
+
+<p>
+    Paste a JSON array of products. Category must be numeric: <code>0</code> = Food, <code>1</code> = NonFood.
+</p>
+<details class="mb-3">
+    <summary class="text-secondary" style="cursor:pointer">Show example</summary>
+    <pre class="mt-2 p-3 bg-light border rounded small">@_example</pre>
+</details>
+
+<div class="mb-3">
+    <textarea class="form-control font-monospace" rows="14" @bind="_json" placeholder="Paste JSON array here…"></textarea>
+</div>
+
+@if (_error is not null)
+{
+    <div class="alert alert-danger">@_error</div>
+}
+
+@if (_result is not null)
+{
+    <div class="alert alert-success">
+        <strong>Imported @_result.Processed product(s).</strong>
+        @if (_result.SkippedCodes.Count > 0)
+        {
+            <div>Skipped (duplicate/invalid): @string.Join(", ", _result.SkippedCodes)</div>
+        }
+    </div>
+}
+
+<button class="btn btn-primary" @onclick="ImportAsync" disabled="@string.IsNullOrWhiteSpace(_json)">Import</button>
+<a class="btn btn-outline-secondary ms-2" href="products">Back</a>
+
+@code {
+    string? _json;
+    ImportResult? _result;
+    string? _error;
+
+    const string _example = """
+        [
+          { "Code": "F1001", "Name": "Organic Bananas", "Category": 0, "Content": "Fresh organic bananas.", "IsActive": true },
+          { "Code": "NF2001", "Name": "Detergent 1L",   "Category": 1, "Content": null,                    "IsActive": true }
+        ]
+        """;
+
+    async Task ImportAsync()
+    {
+        _result = null;
+        _error = null;
+
+        // Validate the input is parseable JSON before forwarding to avoid a confusing 400 from the API.
+        try { System.Text.Json.JsonDocument.Parse(_json!); }
+        catch (System.Text.Json.JsonException ex) { _error = $"Invalid JSON: {ex.Message}"; return; }
+
+        var client = HttpClientFactory.CreateClient("ProductApi");
+        var content = new System.Net.Http.StringContent(_json!, System.Text.Encoding.UTF8, "application/json");
+        var response = await client.PostAsync("api/products/import", content);
+
+        if (response.IsSuccessStatusCode)
+            _result = await response.Content.ReadFromJsonAsync<ImportResult>();
+        else
+            _error = await response.Content.ReadAsStringAsync();
+    }
+}

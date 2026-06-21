@@ -1,0 +1,92 @@
+@page "/products/{Id:guid}/edit"
+@rendermode InteractiveServer
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Nav
+
+<PageTitle>Edit Product</PageTitle>
+<h1>Edit Product</h1>
+
+@if (_form is null)
+{
+    <p>Loading…</p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-6">
+            <EditForm Model="_form" OnValidSubmit="SubmitAsync">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-danger" />
+
+                <div class="mb-3">
+                    <label class="form-label">Name</label>
+                    <InputText class="form-control" @bind-Value="_form.Name" maxlength="50" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Category</label>
+                    <InputSelect class="form-select" @bind-Value="_form.Category">
+                        @foreach (var c in Enum.GetValues<Category>())
+                        {
+                            <option value="@((int)c)">@c</option>
+                        }
+                    </InputSelect>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Content</label>
+                    <InputTextArea class="form-control" @bind-Value="_form.Content" rows="3" />
+                </div>
+                <div class="mb-3 form-check">
+                    <InputCheckbox class="form-check-input" @bind-Value="_form.IsActive" id="isActive" />
+                    <label class="form-check-label" for="isActive">Active</label>
+                </div>
+
+                @if (_error is not null)
+                {
+                    <div class="alert alert-danger">@_error</div>
+                }
+
+                <button type="submit" class="btn btn-primary">Save</button>
+                <a class="btn btn-outline-secondary ms-2" href="products">Cancel</a>
+            </EditForm>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+    FormModel? _form;
+    string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var client = HttpClientFactory.CreateClient("ProductApi");
+        var product = await client.GetFromJsonAsync<ProductDto>($"api/products/{Id}");
+        if (product is not null)
+            _form = new FormModel { Name = product.Name, Category = product.Category, Content = product.Content, IsActive = product.IsActive };
+    }
+
+    async Task SubmitAsync()
+    {
+        _error = null;
+        var client = HttpClientFactory.CreateClient("ProductApi");
+        var response = await client.PutAsJsonAsync($"api/products/{Id}", new
+        {
+            _form!.Name,
+            _form.Category,
+            _form.Content,
+            _form.IsActive,
+        });
+        if (response.IsSuccessStatusCode)
+            Nav.NavigateTo("products");
+        else
+            _error = await response.Content.ReadAsStringAsync();
+    }
+
+    sealed class FormModel
+    {
+        [Required][MaxLength(50)] public string Name { get; set; } = "";
+        public int Category { get; set; } = 0;
+        public string? Content { get; set; }
+        public bool IsActive { get; set; } = true;
+    }
+}

@@ -1,0 +1,41 @@
+@page "/products/{Id:guid}"
+@rendermode InteractiveServer
+@inject IHttpClientFactory HttpClientFactory
+
+<PageTitle>@(_product?.Name ?? "Product")</PageTitle>
+
+@if (_product is null)
+{
+    <p>Loading…</p>
+}
+else
+{
+    <h1>@_product.Name</h1>
+    <dl class="row">
+        <dt class="col-sm-3">Code</dt>
+        <dd class="col-sm-9">@_product.Code</dd>
+        <dt class="col-sm-3">Category</dt>
+        <dd class="col-sm-9">@((Category)_product.Category)</dd>
+        <dt class="col-sm-3">Content</dt>
+        <dd class="col-sm-9">@(_product.Content ?? "—")</dd>
+        <dt class="col-sm-3">Active</dt>
+        <dd class="col-sm-9">@(_product.IsActive ? "Yes" : "No")</dd>
+        <dt class="col-sm-3">Created</dt>
+        <dd class="col-sm-9">@_product.CreatedAt.ToString("g")</dd>
+        <dt class="col-sm-3">Updated</dt>
+        <dd class="col-sm-9">@_product.UpdatedAt.ToString("g")</dd>
+    </dl>
+    <a class="btn btn-primary" href="products/@_product.Id/edit">Edit</a>
+    <a class="btn btn-outline-secondary ms-2" href="products">Back</a>
+}
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+    ProductDto? _product;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var client = HttpClientFactory.CreateClient("ProductApi");
+        _product = await client.GetFromJsonAsync<ProductDto>($"api/products/{Id}");
+    }
+}

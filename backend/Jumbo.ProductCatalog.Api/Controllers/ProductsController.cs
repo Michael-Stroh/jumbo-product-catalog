@@ -28,7 +28,7 @@ public sealed class ProductsController(IProductCatalogService productService) : 
             return Problem(title: "Validation error", detail: result.Error, statusCode: StatusCodes.Status400BadRequest);
         }
 
-        return CreatedAtAction(nameof(GetByIdAsync), new { id = result.Value.Id }, result.Value);
+        return Created($"{Request.Path}/{result.Value.Id}", result.Value);
     }
 
     [HttpPut("{id:guid}")]
