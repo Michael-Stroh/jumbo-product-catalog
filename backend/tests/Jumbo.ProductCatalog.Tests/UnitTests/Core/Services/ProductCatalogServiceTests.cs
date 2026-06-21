@@ -1,20 +1,22 @@
 using FluentAssertions;
 using Jumbo.ProductCatalog.Core.DTOs;
 using Jumbo.ProductCatalog.Core.Interfaces;
+using Jumbo.ProductCatalog.Core.Services;
 using Jumbo.ProductCatalog.Domain.Entities;
 using Jumbo.ProductCatalog.Domain.Enums;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 
-namespace Jumbo.ProductCatalog.Core.Tests;
+namespace Jumbo.ProductCatalog.Tests.UnitTests.Core.Services;
 
+[Trait("Category", "Unit")]
 public sealed class ProductCatalogServiceTests
 {
     private readonly IProductRepository _repository = Substitute.For<IProductRepository>();
-    private readonly Services.ProductCatalogService _sut;
+    private readonly ProductCatalogService _sut;
 
     public ProductCatalogServiceTests() =>
-        _sut = new Services.ProductCatalogService(_repository, NullLogger<Services.ProductCatalogService>.Instance);
+        _sut = new ProductCatalogService(_repository, NullLogger<ProductCatalogService>.Instance);
 
     [Fact]
     public async Task CreateAsync_WhenCodeAlreadyExists_ReturnsFailure()

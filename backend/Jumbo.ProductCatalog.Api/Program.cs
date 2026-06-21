@@ -32,12 +32,12 @@ builder.Services.AddOpenApi(options =>
     {
         document.Info = new()
         {
-            Title = "Jumbo Product Service API",
+            Title = "Jumbo Product Catalog API",
             Version = "v1",
             Description = "REST API for managing products in the Jumbo product catalogue.",
             Contact = new()
             {
-                Name = "Jumbo Product Service",
+                Name = "Jumbo Product Catalog API",
             },
         };
         return Task.CompletedTask;
@@ -74,7 +74,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference(options =>
     {
-        options.Title = "Jumbo Product Service";
+        options.Title = "Jumbo Product Catalog API";
         options.Theme = ScalarTheme.Default;
         options.DefaultHttpClient = new(ScalarTarget.CSharp, ScalarClient.HttpClient);
     });

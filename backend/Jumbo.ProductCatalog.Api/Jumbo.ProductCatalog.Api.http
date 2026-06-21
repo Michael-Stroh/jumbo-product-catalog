@@ -1,6 +1,53 @@
 @Jumbo.ProductCatalog.Api_HostAddress = http://localhost:5174
+@ProductId = <replace-with-id>
 
+### Health check
 GET {{Jumbo.ProductCatalog.Api_HostAddress}}/healthz
+
+###
+
+### Create product
+POST {{Jumbo.ProductCatalog.Api_HostAddress}}/api/products
+Content-Type: application/json
+
+{
+  "code": "JUMBO-001",
+  "name": "Jumbo Whole Milk 1L",
+  "description": "Fresh whole milk",
+  "price": 1.29,
+  "category": 1,
+  "isActive": true
+}
+
+###
+
+### Get all products
+GET {{Jumbo.ProductCatalog.Api_HostAddress}}/api/products
+
+###
+
+### Get product by ID
+GET {{Jumbo.ProductCatalog.Api_HostAddress}}/api/products/{{ProductId}}
+
+###
+
+### Update product
+PUT {{Jumbo.ProductCatalog.Api_HostAddress}}/api/products/{{ProductId}}
+Content-Type: application/json
+
+{
+  "code": "JUMBO-001",
+  "name": "Jumbo Whole Milk 1L",
+  "description": "Fresh whole milk",
+  "price": 1.49,
+  "category": 1,
+  "isActive": true
+}
+
+###
+
+### Delete product (soft delete — sets IsArchived = true)
+DELETE {{Jumbo.ProductCatalog.Api_HostAddress}}/api/products/{{ProductId}}
 Accept: application/json
 
 ###

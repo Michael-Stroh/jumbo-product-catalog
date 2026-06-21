@@ -1,9 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <IsPackable>false</IsPackable>
-    <!-- xUnit test naming convention uses underscores; suppress CA1707 only in test projects -->
-    <NoWarn>$(NoWarn);CA1707</NoWarn>
+    <!-- xUnit test naming convention uses underscores and omits Async suffix on test methods -->
+    <NoWarn>$(NoWarn);CA1707;IDE1006</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,7 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\backend\Jumbo.ProductCatalog.Core\Jumbo.ProductCatalog.Core.csproj" />
+    <ProjectReference Include="..\..\Jumbo.ProductCatalog.Core\Jumbo.ProductCatalog.Core.csproj" />
+    <ProjectReference Include="..\..\Jumbo.ProductCatalog.Api\Jumbo.ProductCatalog.Api.csproj" />
   </ItemGroup>
 
   <ItemGroup>

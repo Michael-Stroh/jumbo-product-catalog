@@ -2,14 +2,24 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch API",
+      "name": ".NET Core Launch (web)",
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "dotnet: build",
+      "launchSettingsFilePath": "${workspaceFolder}/backend/Jumbo.ProductCatalog.Api/Properties/launchSettings.json",
+      "launchSettingsProfile": "http",
       "program": "${workspaceFolder}/backend/Jumbo.ProductCatalog.Api/bin/Debug/net10.0/Jumbo.ProductCatalog.Api.dll",
       "args": [],
-      "cwd": "${workspaceFolder}/backend/Jumbo.ProductCatalog.Api",
+      "cwd": "${workspaceFolder}",
       "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)",
+        "uriFormat": "%s/scalar/v1"
+      },
+      "launchBrowser": {
+        "enabled": true
+      },
       "env": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
